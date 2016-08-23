@@ -1,0 +1,46 @@
+import "../thrift-helper-functions.eol";
+
+//"Chocolate>Cake>Coffee>Banana>Strawberry".split(">").replace(2, "Tea").println();
+
+//"list<map<set<i32>>,map<string,i16>>".getInnerType().println();
+//"list<i32>".getInnerType().println();
+//"List<Set<List<Integer>>>".getInnerType().println().getInnerType().println().getInnerType().println().getInnerType().println();
+
+var test : String;
+test = "Contents of a JavaDoc.\nLine2\nLine3\n";
+test = test.makeComment("/"+"*\n", "", "*/");
+test.println();
+test.getCommentContents().print();
+
+/*
+test = "\"This is a string with quotes.\"";
+test.escapedString().println();
+test = "map<simpleStruct,list<long>>";
+test.getMapKey().println();
+test = "Map<Long,String>";
+test.getMapKey().println();
+test.getMapValue().println();
+"".println();
+test = "map<map<string,map<i64,i32>>,list<map<string,bool>>>";
+test.getMapKey().println();
+test.getMapValue().println();
+"".println();
+test = "map<string,int>";
+test.getMapKey().println();
+test.getMapValue().println();
+"".println();
+test = "map<int,set<map<string,list<map<string,i32>>>>>";
+test.getMapKey().println();
+test.getMapValue().println();
+"".println();
+test = "map<set<map<string,list<map<string,i32>>>>,int>";
+test.getMapKey().println();
+test.getMapValue().println();
+"".println();
+test = "map<list<map<string,list<i32>>,set<string>>";
+test.getMapKey().println();
+test.getMapValue().println();
+"".println();
+test = "map<set<string>,list<map<string,list<i32>>>";
+test.getMapKey().println();
+test.getMapValue().println();*/

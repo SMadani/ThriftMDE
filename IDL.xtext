@@ -1,0 +1,145 @@
+grammar org.apache.thrift.IDL with org.eclipse.xtext.common.Terminals hidden (WS, SL_COMMENT)
+
+generate idl "http://www.apache.org/thrift/IDL"
+
+import "http://www.eclipse.org/emf/2002/Ecore" as ecore
+
+//Every Thrift document contains 0 or more headers followed by 0 or more definitions.
+Document:
+	headers += Header* definitions += Definition*;
+
+//A header is either a Thrift include, a C++ include, or a namespace declaration.
+Header:
+	Include | CppInclude | Namespace;
+
+//An include makes all the symbols from another file visible (with a prefix) and adds corresponding include statements into the code generated for this Thrift document.
+Include:
+	'include' literal = LITERAL;
+
+//A C++ include adds a custom C++ include to the output of the C++ code generator for this Thrift document.
+CppInclude:
+	'cpp_include' literal = LITERAL;
+
+//A namespace declares which namespaces/package/module/etc. the type definitions in this file will be declared in for the target languages. The namespace scope indicates which language the namespace applies to; a scope of '*' indicates that the namespace applies to all target languages.
+Namespace:
+	comment = ML_COMMENT? ('namespace'(scope = NamespaceScope identifier = IDENTIFIER) |
+                                        ('smalltalk.category' stIdentifier = ST_IDENTIFIER) |
+                                        ('smalltalk.prefix' identifier = IDENTIFIER)) |
+                          ('php_namespace' literal = LITERAL) |
+                          ('xsd_namespace' literal = LITERAL);
+
+enum NamespaceScope:
+	any='*' | cpp | java | py | perl | rb | cocoa | csharp | js | st | c_glib | php | delphi | lua | go | hs | haxe | ocaml | ts | erl | d | as3 | nodejs | javame;
+
+Definition:
+	Const | Typedef | Enum | Senum | Struct | Union | Service;
+
+Const:
+	comment = ML_COMMENT? 'const' fieldType = FieldType identifier = IDENTIFIER '=' constVal = ConstValue (';')?;
+
+//A typedef creates an alternate name for a type.
+Typedef:
+	comment = ML_COMMENT? 'typedef' aliasFor = DefinitionType identifier = IDENTIFIER ';';
+
+//An enum creates an enumerated type, with named values. If no constant value is supplied, the value is either 0 for the first element, or one greater than the preceding value for any subsequent element. Any constant value that is supplied must be non-negative.
+Enum:
+	comment = ML_COMMENT? 'enum' identifier = IDENTIFIER '{' (pairs += EnumPair ',')* pairs += EnumPair (',' | ';')? '}';
+
+//Senum (and Slist) are now deprecated and should both be replaced with String.
+Senum:
+	'senum' identifier = IDENTIFIER '{' (literals += LITERAL (',' literals += LITERAL)* (';')?)? '}';
+
+//Structs are the fundamental compositional type in Thrift. The name of each field must be unique within the struct.
+Struct:
+	(comment = ML_COMMENT)? (isException ?= 'exception' | 'struct') identifier = IDENTIFIER (xsd ?= 'xsd_all')? '{' (fields += Field (',' fields += Field)* (',' | ';')?)? '}';
+
+//Unions are similar to structs, except that they provide a means to transport exactly one field of a possible set of fields, just like union {} in C++. Consequently, union members are implicitly considered optional (see requiredness).
+Union:
+	comment = ML_COMMENT? 'union' identifier = IDENTIFIER (xsd ?= 'xsd_all')? '{' (fields += Field (',' fields += Field)* (';'|',')?)? '}';
+
+//Services are interfaces.
+Service:
+	comment = ML_COMMENT? 'service' identifier = IDENTIFIER ('extends' supers = IDENTIFIER)? '{' (functions += Function (';'|','))* '}';
+
+Field:
+	comment = ML_COMMENT? (fieldID = INT hasFID ?= ':')? (fieldReq = FieldReq)? fieldType = FieldType identifier = IDENTIFIER (hasValue ?= '=' constVal = ConstValue)? xsdFieldOpt = XsdFieldOptions;
+
+//There are two explicit requiredness values, and a third one that is applied implicity if neither required nor optional are given: default requiredness.
+enum FieldReq:
+	DEFAULT | required | optional;
+
+XsdFieldOptions:
+	{XsdFieldOptions} optional ?= 'xsd_optional'? nillable ?= 'xsd_nillable'? (attribute = XsdAttrs)?;
+
+XsdAttrs:
+	{XsdAttrs} 'xsd_attrs' '{' args += Field (',' args += Field)* '}';
+
+Function:
+	comment = ML_COMMENT? isOneway ?= 'oneway'? funcType = FunctionType identifier = IDENTIFIER '(' (args += Field (',' args += Field)*)? ')' ('throws' '(' exceptions += Field (',' exceptions += Field)* ')')?;
+
+//The return type may be "void".
+FunctionType:
+	fieldType = FieldType | void ?= 'void';
+
+FieldType:
+	defType = DefinitionType | typedef = [Typedef] | identifier = IDENTIFIER;
+
+DefinitionType:
+	container = ContainerType | base = BaseType;
+
+enum BaseType:
+	slist | i8 | bool | byte | i16 | i32 | i64 | double | string | binary;
+
+ContainerType:
+	MapType | SetType | ListType;
+
+MapType:
+	keyword = 'map' (cppType = CppType)? '<' keyType = FieldType ',' valType = FieldType '>';
+
+SetType:
+	keyword = 'set' (cppType = CppType)? '<' fieldType = FieldType '>';
+
+ListType:
+	keyword = 'list' (cppType = CppType)? '<' fieldType = FieldType '>';
+
+CppType:
+	'cpp_type' literal = LITERAL;
+
+ConstValue:
+	list = ConstList | map = ConstMap | double = DoubleConst | integer = IntConst | bool = BoolConst | literal = LITERAL | identifier = IDENTIFIER;
+
+IntConst: //returns ecore::EInt:
+	negative ?= '-'? value = INT;//(digits += DIGIT)+;
+
+DoubleConst: //returns ecore::EDouble:
+	significant = IntConst '.' fractional = INT (('E' | 'e') exponent = IntConst)?;
+
+ConstList:
+	{ConstList} '[' (constVals += ConstValue (',' constVals += ConstValue)*)? ']';
+
+ConstMap:
+	{ConstMap} '{' (pairs += ConstMapPair (',' pairs += ConstMapPair)*)? '}';
+
+ConstMapPair:
+	key = ConstValue ':' value = ConstValue;
+
+EnumPair:
+	identifier = IDENTIFIER (hasFID ?= '=' fieldID = INT)?;
+
+enum BoolConst:
+	DEFAULT | FALSE = 'false' | TRUE = 'true';
+
+terminal IDENTIFIER:
+	(LETTER | '_') (LETTER | DIGIT | '.' | '_')*;
+
+terminal ST_IDENTIFIER:
+	(LETTER | '_') (LETTER | DIGIT | '.' | '_' | '-')*;
+
+terminal LITERAL:
+	('"' (!'"')* '"') | ("'" (!"'")* "'");
+
+terminal LETTER returns ecore::EChar:
+	'A'..'Z' | 'a'..'z';
+
+terminal DIGIT returns ecore::EChar:
+	'0'..'9';
