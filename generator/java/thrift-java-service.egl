@@ -66,7 +66,7 @@ public class [%=identifier%] {
       [% if (func.isVoid()) {%]
       return;
       [%} else {%]
-      	if (result.isSetSuccess()) {
+      if (result.isSetSuccess()) {
         return result.success;
       }
       throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "[%=func.identifier%] failed: unknown result");
@@ -150,7 +150,8 @@ public class [%=identifier%] {
       return processMap;
     }
 
-[% for (func in functions) {%]
+[% for (func in functions) {
+	var resultName : String = func.isOneway.ternary("org.apache.thrift.TBase", func.identifier+"_result"); %]
     public static class [%=func.identifier%]<I extends Iface> extends org.apache.thrift.ProcessFunction<I, [%=func.identifier%]_args> {
       public [%=func.identifier%]() {
         super("[%=func.identifier%]");
@@ -164,12 +165,12 @@ public class [%=identifier%] {
         return [%=func.isOneway%];
       }
 
-      public [%=func.identifier%]_result getResult(I iface, [%=func.identifier%]_args args) throws org.apache.thrift.TException {
+      public [%=resultName%] getResult(I iface, [%=func.identifier%]_args args) throws org.apache.thrift.TException {
 	[% if (not func.isOneway) {%]
-        [%=func.identifier%]_result result = new [%=func.identifier%]_result();
+        [%=resultName%] result = new [%=resultName%]();
     [%}%]
-		result.success = iface.[%=func.identifier%]([%=func.getArgs(false, "args.")%]);
-	[% if (not func.isOneway and func.isPrimitive()) {%]
+        result.success = iface.[%=func.identifier%]([%=func.getArgs(false, "args.")%]);
+	[% if (not func.isVoid() and func.isPrimitive()) {%]
         result.setSuccessIsSet(true);
     [%}%]
         return [%="result".changeIf(func.isOneway, "null")%];
@@ -241,7 +242,7 @@ public class [%=identifier%] {
               LOGGER.error("Exception writing to internal frame buffer", ex);
             }
             fb.close();
-          [%}%]}
+          }[%}%]
         };
       }
 

@@ -1,10 +1,57 @@
+#!/usr/local/bin/thrift --java --php --py
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# *** PLEASE REMEMBER TO EDIT THE VERSION CONSTANT WHEN MAKING CHANGES ***
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#
+# Interface definition for Cassandra Service
+#
+
 namespace java org.apache.cassandra.thrift
 namespace cpp org.apache.cassandra
 namespace csharp Apache.Cassandra
 namespace py cassandra
 namespace php cassandra
 namespace perl Cassandra
+
+# Thrift.rb has a bug where top-level modules that include modules 
+# with the same name are not properly referenced, so we can't do
+# Cassandra::Cassandra::Client.
 namespace rb CassandraThrift
+
+# The API version (NOT the product version), composed as a dot delimited
+# string with major, minor, and patch level components.
+#
+#  - Major: Incremented for backward incompatible changes. An example would
+#           be changes to the number or disposition of method arguments.
+#  - Minor: Incremented for backward compatible changes. An example would
+#           be the addition of a new (optional) method.
+#  - Patch: Incremented for bug fixes. The patch level should be increased
+#           for every edit that doesn't result in a change to major/minor.
+#
+# See the Semantic Versioning Specification (SemVer) http://semver.org.
+const string VERSION = "19.24.0"
+
+
+#
+# data structures
+#
 
 /** Basic unit of data within a ColumnFamily.
  * @param name, the name by which this column is set and retrieved.  Maximum 64KB long.
@@ -61,6 +108,12 @@ struct ColumnOrSuperColumn {
     4: optional CounterSuperColumn counter_super_column
 }
 
+
+#
+# Exceptions
+# (note that internal server errors will raise a TApplicationException, courtesy of Thrift)
+#
+
 /** A specific column was requested that does not exist. */
 exception NotFoundException {
 }
@@ -94,6 +147,10 @@ exception AuthorizationException {
 exception SchemaDisagreementException {
 }
 
+
+#
+# service api
+#
 /** 
  * The ConsistencyLevel is an enum that controls both read and write
  * behavior based on the ReplicationFactor of the keyspace.  The
@@ -228,7 +285,7 @@ struct IndexExpression {
 }
 
 struct IndexClause {
-    1: required list<IndexExpression> expressions,
+    1: required list<IndexExpression> expressions
     2: required binary start_key,
     3: required i32 count=100,
 }
@@ -303,7 +360,7 @@ struct TokenRange {
     1: required string start_token,
     2: required string end_token,
     3: required list<string> endpoints,
-    4: optional list<string> rpc_endpoints,
+    4: optional list<string> rpc_endpoints
     5: optional list<EndpointDetails> endpoint_details,
 }
 
@@ -406,8 +463,13 @@ struct CqlPreparedResult {
 
 
 service Cassandra {
+  # auth methods
   void login(1: required AuthenticationRequest auth_request) throws (1:AuthenticationException authnx, 2:AuthorizationException authzx),
+ 
+  # set keyspace
   void set_keyspace(1: required string keyspace) throws (1:InvalidRequestException ire),
+  
+  # retrieval methods
 
   /**
     Get the Column or SuperColumn at the given column_path. If no value is present, NotFoundException is thrown. (This is
@@ -471,6 +533,8 @@ service Cassandra {
                                     3:required SlicePredicate column_predicate,
                                     4:required ConsistencyLevel consistency_level=ConsistencyLevel.ONE)
                  throws (1:InvalidRequestException ire, 2:UnavailableException ue, 3:TimedOutException te),
+
+  # modification methods
 
   /**
    * Insert a Column at the given column_parent.column_family and optional column_parent.super_column.
@@ -619,7 +683,7 @@ service Cassandra {
     throws (1:InvalidRequestException ire,
             2:UnavailableException ue,
             3:TimedOutException te,
-            4:SchemaDisagreementException sde);
+            4:SchemaDisagreementException sde)
             
             
   /**
@@ -629,7 +693,7 @@ service Cassandra {
    * - a count of the discovered bound markers in the statement 
    */
   CqlPreparedResult prepare_cql_query(1:required binary query, 2:required Compression compression)
-    throws (1:InvalidRequestException ire);
+    throws (1:InvalidRequestException ire)
 
              
   /**
@@ -640,7 +704,7 @@ service Cassandra {
     throws (1:InvalidRequestException ire,
             2:UnavailableException ue,
             3:TimedOutException te,
-            4:SchemaDisagreementException sde);
+            4:SchemaDisagreementException sde)
            
 
 }
