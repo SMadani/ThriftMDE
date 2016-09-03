@@ -7,12 +7,18 @@ import "../thrift-helper-functions.eol";
 //"List<Set<List<Integer>>>".getInnerType().println().getInnerType().println().getInnerType().println().getInnerType().println();
 
 var test : String;
-test = "Contents of a JavaDoc.\nLine2\nLine3\n";
-test = test.makeComment("/"+"*\n", "", "*/");
+
+test = "arg1, arg2, ";
+//test = "arg1";
+if (test.endsWith(", "))
+	test = test.substring(0,test.length()-2);
 test.println();
-test.getCommentContents().print();
 
 /*
+test = "Contents of a JavaDoc.\nLine2\nLine3\n";
+test = test.makeComment("/"+'*'+\n", "", "*"+'/');
+test.println();
+test.getCommentContents().print();
 test = "\"This is a string with quotes.\"";
 test.escapedString().println();
 test = "map<simpleStruct,list<long>>";

@@ -4,6 +4,7 @@ pre {
 	doSetup();
 	var uniqueMsg : String = " is used multiple times.";
 	var referenceMsg : String = " does not refer to a known type.";
+	var allExceptions = Struct.allInstances().select(st | st.isException);
 	
 	var topLevelIdentifiers : new Bag;
 	topLevelIdentifiers.addAll(Service.allInstances().collect(service | service.identifier));
@@ -166,7 +167,7 @@ context Field {
 	}
 	constraint uniqueFIDs {
 		guard: self.hasFID and self.eContainer.hasProperty("fields")
-		check: self.eContainer.fields.select(withFid | withFid.hasFID).one(field | field.fieldID == self.fieldID)
+		check: self.eContainer.fields.select(withFid | withFid.hasFID).select(field | field.fieldID == self.fieldID).size() <= 1
 		message: "'"+self.eContainer.identifier+"' has multiple fields with the ID '"+self.fieldID+"'."
 	}
 	constraint uniqueIdentifiers {
@@ -176,12 +177,22 @@ context Field {
 	}
 	constraint uniqueFuncFIDs {
 		guard: self.hasFID and self.eContainer.hasProperty("args")
-		check: self.eContainer.args.select(withFid | withFid.hasFID).one(field | field.fieldID == self.fieldID)
+		check: self.eContainer.args.select(withFid | withFid.hasFID).select(field | field.fieldID == self.fieldID).size() <= 1
 		message: "'"+self.eContainer.identifier+"' has multiple fields with the ID '"+self.fieldID+"'."
 	}
 	constraint uniqueFuncIdentifiers {
 		guard: self.eContainer.hasProperty("args")
-		check: self.eContainer.args.one(field | field.identifier == self.identifier)
+		check: self.eContainer.args.select(field | field.identifier == self.identifier).size() <= 1
+		message: "'"+self.eContainer.identifier+"' has multiple fields with the name '"+self.identifier+"'."
+	}
+	constraint uniqueExceptionFIDs {
+		guard: self.hasFID and self.eContainer.hasProperty("exceptions")
+		check: self.eContainer.exceptions.select(withFid | withFid.hasFID).select(field | field.fieldID == self.fieldID).size() <= 1
+		message: "'"+self.eContainer.identifier+"' has multiple fields with the ID '"+self.fieldID+"'."
+	}
+	constraint uniqueExceptionIdentifiers {
+		guard: self.eContainer.hasProperty("exceptions")
+		check: self.eContainer.exceptions.select(field | field.identifier == self.identifier).size() <= 1
 		message: "'"+self.eContainer.identifier+"' has multiple fields with the name '"+self.identifier+"'."
 	}
 }
@@ -201,8 +212,8 @@ context EnumPair {
 
 context Function {
 	constraint knownExceptions {
-		guard: self.exceptions.isDefined() and self.exceptions.size() > 0
-		check: self.exceptions.forAll(fex | Struct.allInstances().select(st | st.isException).one(stex | stex.identifier == fex.identifier))
+		guard: self.hasExceptions
+		check: self.exceptions.forAll(fex | allExceptions.one(stex | stex.identifier == fex.fieldType.identifier))
 		message: "'"+self.identifier+"' has exceptions which are not defined."
 	}
 	constraint functionsAreUnique {

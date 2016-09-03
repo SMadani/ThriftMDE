@@ -75,7 +75,7 @@ XsdAttrs:
 	{XsdAttrs} 'xsd_attrs' '{' args += Field (',' args += Field)* '}';
 
 Function:
-	comment = ML_COMMENT? isOneway ?= 'oneway'? funcType = FunctionType identifier = IDENTIFIER '(' (args += Field (',' args += Field)*)? ')' ('throws' '(' exceptions += Field (',' exceptions += Field)* ')')?;
+	comment = ML_COMMENT? isOneway ?= 'oneway'? funcType = FunctionType identifier = IDENTIFIER '(' (args += Field (',' args += Field)*)? ')' (hasExceptions ?= 'throws' '(' exceptions += Field (',' exceptions += Field)* ')')?;
 
 //The return type may be "void".
 FunctionType:

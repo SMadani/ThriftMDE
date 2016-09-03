@@ -111,8 +111,9 @@ operation String removeSurroundingQuotes() : String {
 }
 
 operation String getCommentContents() : String {
-	//TODO
-	return self;
+	return self
+		.replaceAll("/"+"\\*", "")
+		.replaceAll("\\*"+'/', "");
 }
 
 operation String makeComment(start, prefix, end, padding) : String {

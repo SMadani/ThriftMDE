@@ -217,10 +217,14 @@ operation Function getSignature(exception : String) : String {
 }
 
 operation Function getArgs(includeTypes : Boolean) : String {
-	return self.getArgs(includeTypes, "");
+	return self.getArgs(includeTypes, false);
 }
 
-operation Function getArgs(includeTypes : Boolean, prefixText : String) : String {
+operation Function getArgs(includeTypes : Boolean, includeContinuation : Boolean) : String {
+	return self.getArgs(includeTypes, "", "".changeIf(includeContinuation, ", "));
+}
+
+operation Function getArgs(includeTypes : Boolean, prefixText : String, continuation : String) : String {
 	var argstr : String = "";
 	for (arg in self.args) {
 		if (includeTypes) {
@@ -231,12 +235,19 @@ operation Function getArgs(includeTypes : Boolean, prefixText : String) : String
 	if (argstr.endsWith(", ")) {
 		argstr = argstr.substring(0, argstr.length()-2);
 	}
+	if (self.args.size() > 0) {
+		argstr += continuation;
+	}
 	return argstr;
 }
 
 @cached
 operation Function getExceptions() : String {
-	return "org.apache.thrift.TException";
+	var excsig : String = "";
+	for (xception in self.exceptions) {
+		excsig += xception.fieldType.identifier+", ";
+	}
+	return excsig+"org.apache.thrift.TException";
 }
 
 operation Field getDeclaration() : String {

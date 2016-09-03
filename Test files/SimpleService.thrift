@@ -14,18 +14,6 @@ const simpleStruct structConst = {"integerThing" : 85};
 const complexStruct insaneStruct = {"nestedStruct" : {"longThing" : 5000, "simpleThing" : structConst}, "anotherSimpleStruct" : {"integerThing" : 6670}};
 
 /**
- * Example service
- */
-service Calculator {
-	/** ** *boo!
-	 * -- Example function *
-	star */
-	binary myFunc (1: i16 num1, 2: map<string,i32> entries, 3: set<string> names, 4: list<bool> truth);
-	oneway void blankFun(1: i32 firstOne);
-	i32 standardFunc(1: double input1, 2: i16 input2);
-}
-
-/**
  * Example enum
  */
 enum myEnum {
@@ -83,4 +71,18 @@ union myOnion {
 	14: simpleStruct simpleThing ,
 	15: list<simpleStruct> strucList,
 	16: set<bool> simpleSet
+}
+
+/**
+ * Example service
+ */
+service Calculator {
+	/** ** *boo!
+	 * -- Example function *
+	star */
+	binary myFunc (1: i16 num1, 2: map<string,i32> entries, 3: set<string> names, 4: list<bool> truth);
+	oneway void inputOnly(1: i32 firstOne);
+	void blankFunc();
+	i32 standardFunc(1: double input1, 2: i16 input2);
+	string funcWithExceptions(1: i64 bigNum) throws (5: myExc error);
 }
