@@ -3,7 +3,7 @@ package org.apache.thrift;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
+import java.util.Collection;
 import org.apache.thrift.IDLStandaloneSetup;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -59,7 +59,7 @@ public class ThriftCompiler {
 	    IEvlContext evlContext = evl.getContext();
 	    evlContext.getModelRepository().addModel(model);
 	    evl.execute();
-	    List<UnsatisfiedConstraint> failedConstraints = evlContext.getUnsatisfiedConstraints();
+	    Collection<UnsatisfiedConstraint> failedConstraints = evlContext.getUnsatisfiedConstraints();
 	    if (!failedConstraints.isEmpty()) {
 	    	System.err.println("Semantic validation failed:");
 	    	failedConstraints.forEach(constraint -> System.out.println(constraint.getMessage()));
