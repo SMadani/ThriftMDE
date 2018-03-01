@@ -1,6 +1,6 @@
-grammar org.apache.thrift.IDL with org.eclipse.xtext.common.Terminals hidden (WS, SL_COMMENT)
+grammar org.apache.thrift.Thrift with org.eclipse.xtext.common.Terminals hidden (WS, SL_COMMENT)
 
-generate idl "http://www.apache.org/thrift/IDL"
+generate thriftIDL "http://www.apache.org/thrift/Thrift"
 
 import "http://www.eclipse.org/emf/2002/Ecore" as ecore
 

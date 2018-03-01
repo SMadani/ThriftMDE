@@ -1,10 +1,8 @@
 package org.apache.thrift;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import org.apache.thrift.IDLStandaloneSetup;
+import java.util.Collection;
+import org.apache.thrift.ThriftStandaloneSetup;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.epsilon.egl.EglFileGeneratingTemplateFactory;
@@ -38,7 +36,7 @@ public class ThriftCompiler {
 		}
 		
 		//Parsing the input file into an EMF model
-		Injector injector = (Injector) new IDLStandaloneSetup().createInjectorAndDoEMFRegistration();
+		Injector injector = (Injector) new ThriftStandaloneSetup().createInjectorAndDoEMFRegistration();
 		XtextResourceSet resourceSet = injector.getInstance(XtextResourceSet.class);
 		resourceSet.addLoadOption(XtextResource.OPTION_RESOLVE_ALL, true);
 		File thriftFile = new File(args[1]);
@@ -59,7 +57,7 @@ public class ThriftCompiler {
 	    IEvlContext evlContext = evl.getContext();
 	    evlContext.getModelRepository().addModel(model);
 	    evl.execute();
-	    List<UnsatisfiedConstraint> failedConstraints = evlContext.getUnsatisfiedConstraints();
+	    Collection<UnsatisfiedConstraint> failedConstraints = evlContext.getUnsatisfiedConstraints();
 	    if (!failedConstraints.isEmpty()) {
 	    	System.err.println("Semantic validation failed:");
 	    	failedConstraints.forEach(constraint -> System.out.println(constraint.getMessage()));
@@ -77,7 +75,6 @@ public class ThriftCompiler {
 	    FrameStack egxFrames = egxContext.getFrameStack();
 	    egxContext.getModelRepository().addModel(model);
 	    egxFrames.put(Variable.createReadOnlyVariable("fileName", fileName));
-	    egxFrames.put(Variable.createReadOnlyVariable("date", new SimpleDateFormat("yyyy-MM-dd").format(new Date())));
 	    egx.execute();
 	}
 }

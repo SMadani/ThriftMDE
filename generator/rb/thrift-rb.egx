@@ -1,5 +1,7 @@
 import "../thrift-helper-functions.eol";
+
 pre {
+	var date : String = getDate();
 	doSetup();
 	var extension : String = ".rb";
 	var rbName : String = fileName.camelToUnderscore().toLowerCase();

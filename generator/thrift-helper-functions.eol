@@ -3,6 +3,15 @@ operation EOL() {
 	return '\n';
 }
 
+//For testing purposes
+operation getThriftFileName() : String {
+	return "EpsilonThriftTest";
+}
+
+operation getDate() : String {
+	return new Native("java.text.SimpleDateFormat")("yyyy-MM-dd").format(new Native("java.util.Date"));
+}
+
 operation incrementAndGet() : Integer {
 	return Document.allInstances().first().~internalCounter++;
 }
@@ -80,7 +89,7 @@ operation attachProperties() {
 
 operation attachAliases(fieldTypes : Collection, typedefs : Collection) {
 	for (fieldType in fieldTypes.select(ft | ft.identifier.isDefined() and ft.identifier.length() > 0)) {
-		var tdProp : Typedef = typedefs.selectOne(td | fieldType.identifier.matches(td.identifier));
+		var tdProp : Typedef = typedefs.selectOne(td | td.identifier.isDefined() and fieldType.identifier.matches(td.identifier));
 		if (tdProp.isDefined()) {
 			fieldType.~typedef = tdProp.identifier;
 			fieldType.~trueType = tdProp.aliasFor;
