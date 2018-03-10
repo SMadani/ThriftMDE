@@ -2,6 +2,12 @@ import "../generator/thrift-helper-functions.eol";
 
 pre {
 	doSetup();
+
+	// Cache the types as it will be needed in a constraint
+	for (c in Const.allInstances()) {
+		c.thriftType();
+	}
+
 	var uniqueMsg : String = " is used multiple times.";
 	var referenceMsg : String = " does not refer to a known type.";
 	var allExceptions = Struct.allInstances().select(st | st.isException);
@@ -145,7 +151,9 @@ constraint noTopLevelClashes {
 
 context Const {
 	constraint assignmentsAreLegal {
-		check: self.constVal.isOfType(self.thriftType())
+		check {
+			return self.constVal.isOfType(self.thriftType());
+		}
 		message: "The constant value '"+self.identifier+"' is assigned to an incompatible type."// '"+self.constVal.deduceType()+"'."
 	}
 }
@@ -241,4 +249,8 @@ context Senum {
 		check: Senum.allInstances().size() == 0
 		message: "'Senum' is deprecated and will be removed in future versions. Consider using 'string' instead."
 	}
+}
+
+post {
+		
 }

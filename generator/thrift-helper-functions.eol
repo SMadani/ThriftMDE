@@ -390,7 +390,7 @@ operation ConstValue equals(other : ConstValue) : Boolean {
 	if (self.isBool() and other.isBool()) {
 		return self.bool.literal == other.bool.literal;
 	}
-	return self.identifier = other.identifier;
+	return self.identifier == other.identifier;
 }
 
 operation ConstValue isOfType(expected : String) : Boolean {
@@ -428,9 +428,10 @@ operation ConstValue isOfType(expected : String) : Boolean {
 	else if (ctype.startsWith("list<") or ctype.startsWith("set<")) {
 		if (self.isList()) {
 			var inner : String = ctype.getInnerType();
-			//TODO: if (isSet())
+			//TODO: if (self.isSet())
 			return self.list.constVals.forAll(cv | cv.isOfType(inner));
 		}
+		
 		var constant : Const = self.identifier.getConst();
 		if (constant.isDefined()) {
 			return constant.constVal.isOfType(ctype);
