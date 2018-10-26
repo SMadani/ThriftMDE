@@ -1,6 +1,7 @@
 import "../thrift-helper-functions.eol";
 
 pre {
+	var fileName = getThriftFileName();	//This is typically parameterized!
 	var date : String = getDate();
 	doSetup();
 	var extension : String = ".rb";
